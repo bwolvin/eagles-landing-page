@@ -1,34 +1,18 @@
 <template>
   <div class="landing-page-wrapper">
-    <div class="header">
-      <h1><img :src="teamData.strTeamBanner" alt="Philadelphia Eagles" /></h1>
-    </div>
+    <Header :banner="teamData.strTeamBanner" :altText="teamData.strTeam" />
     <div class="bdy-content">
       <img class="hero-image" :src="teamData.strTeamFanart1" />
       <p>{{ teamData.strDescriptionEN }}</p>
-      <div class="team-fan-art row">
-        <div class="column">
-          <img :src="teamData.strTeamFanart3" />
-        </div>
-        <div class="column">
-          <img :src="teamData.strTeamFanart4" />
-        </div>
-        <div class="column">
-          <img :src="teamData.strTeamFanart2" />
-        </div>
-      </div>
-      <div class="team-stadium-content row">
-        <div class="column">
-          <img :src="teamData.strStadiumThumb" />
-        </div>
-        <div class="column stadium-description">
-          <img :src="teamData.strTeamLogo" class="team-logo" />
-          <h2>{{ teamData.strStadium }}</h2>
-          <p><span>Location:</span> {{ teamData.strStadiumLocation }}</p>
-          <p><span>Capacity:</span> {{ teamData.intStadiumCapacity }}</p>
-        </div>
-        <p>{{ teamData.strStadiumDescription }}</p>
-      </div>
+      <FanArt :fanArtList="fanArtList" />
+      <TeamStadium
+        :stadiumThumb="teamData.strStadiumThumb"
+        :stadiumName="teamData.strStadium"
+        :stadiumLocation="teamData.strStadiumLocation"
+        :stadiumCapacity="teamData.intStadiumCapacity"
+        :stadiumDescription="teamData.strStadiumDescription"
+        :teamLogo="teamData.strTeamLogo"
+      />
     </div>
     <Footer
       :website="teamData.strWebsite"
@@ -42,10 +26,16 @@
 <script>
 import axios from "axios";
 import Footer from "../components/Footer";
+import FanArt from "../components/FanArt";
+import Header from "../components/Header";
+import TeamStadium from "../components/TeamStadium";
 
 export default {
   name: "LandingPage",
   components: {
+    Header,
+    FanArt,
+    TeamStadium,
     Footer,
   },
   props: {
@@ -54,6 +44,7 @@ export default {
   data() {
     return {
       teamData: {},
+      fanArtList: [],
     };
   },
   created() {
@@ -61,34 +52,40 @@ export default {
   },
   methods: {
     getLandingPageData(favTeamStr) {
+      const url =
+        "https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=";
       axios
-        .get(
-          `https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${this.favTeam}`
-        )
+        .get(`${url}${this.favTeam}`)
         .then((response) => {
           const {
             data: { teams },
           } = response;
+
           this.teamData = teams[0];
+
+          this.fanArtList = this.buildFanArtSection();
         })
         .catch((error) => {
           // handle error
           console.log(error);
         });
     },
+    buildFanArtSection() {
+      const fanArtList = [];
+      Object.keys(this.teamData).forEach((eachKey) => {
+        if (eachKey.includes("TeamFanart")) {
+          const fanArt = this.teamData[eachKey];
+          fanArtList.push(fanArt);
+        }
+      });
+      return fanArtList.reverse();
+    },
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
-h1 {
-  text-align: center;
-  img {
-    max-width: 960px;
-  }
-}
-
+<style lang="scss">
 .hero-image {
   max-width: 100%;
 }
@@ -99,6 +96,10 @@ h1 {
   margin: 0 auto;
   height: 100%;
   text-align: justify;
+
+  @media screen and (max-width: 320px) {
+    max-width: 320px;
+  }
 }
 
 .bdy-content {
@@ -108,10 +109,6 @@ h1 {
   @media screen and (min-width: 321px) {
     padding: 0 40px 20px 40px;
   }
-}
-
-.team-carousel {
-  position: relative;
 }
 
 @media screen and (min-width: 321px) {
@@ -130,71 +127,6 @@ h1 {
     flex-direction: column;
     flex-basis: 100%;
     flex: 1;
-  }
-}
-
-.team-stadium-content {
-  p {
-    text-align: justify;
-    margin: 0;
-  }
-
-  h2 {
-    margin-bottom: 10px;
-    padding: 0;
-  }
-
-  .team-stadium-copy {
-    padding: 0 0 0 20px;
-  }
-
-  .team-logo {
-    max-width: 50%;
-  }
-
-  img {
-    max-width: 100%;
-    margin: 10px 0;
-  }
-
-  .stadium-description {
-    margin-left: 20px;
-
-    @media screen and (max-width: 320px) {
-      margin-left: 0;
-    }
-
-    p {
-      margin-bottom: 10px;
-    }
-  }
-}
-
-@media screen and (max-width: 320px) {
-  h1 {
-    text-align: center;
-    img {
-      max-width: 320px;
-    }
-  }
-  .landing-page-wrapper {
-    max-width: 320px;
-  }
-
-  .team-stadium-content {
-    .team-stadium-copy {
-      padding: 0;
-    }
-  }
-}
-
-.team-fan-art {
-  .column {
-    padding: 10px;
-  }
-
-  img {
-    max-width: 100%;
   }
 }
 </style>
