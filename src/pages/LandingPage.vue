@@ -1,45 +1,59 @@
 <template>
   <div class="landing-page-wrapper">
     <div class="header">
-      <h1><img :src="teamData.strTeamLogo" alt="Philadelphia Eagles" /></h1>
+      <h1><img :src="teamData.strTeamBanner" alt="Philadelphia Eagles" /></h1>
     </div>
     <div class="bdy-content">
+      <img class="hero-image" :src="teamData.strTeamFanart1" />
       <p>{{ teamData.strDescriptionEN }}</p>
+      <div class="team-fan-art row">
+        <div class="column">
+          <img :src="teamData.strTeamFanart3" />
+        </div>
+        <div class="column">
+          <img :src="teamData.strTeamFanart4" />
+        </div>
+        <div class="column">
+          <img :src="teamData.strTeamFanart2" />
+        </div>
+      </div>
+      <div class="team-stadium-content row">
+        <div class="column">
+          <img :src="teamData.strStadiumThumb" />
+        </div>
+        <div class="column stadium-description">
+          <img :src="teamData.strTeamLogo" class="team-logo" />
+          <h2>{{ teamData.strStadium }}</h2>
+          <p><span>Location:</span> {{ teamData.strStadiumLocation }}</p>
+          <p><span>Capacity:</span> {{ teamData.intStadiumCapacity }}</p>
+        </div>
+        <p>{{ teamData.strStadiumDescription }}</p>
+      </div>
     </div>
-    <div class="footer">
-      <ul>
-        <li>
-          <a
-            :href="teamData.strWebsite"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Website</a
-          >
-        </li>
-        <li>
-          <a
-            :href="teamData.strFacebook"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Facebook</a
-          >
-        </li>
-        <li><a href="">Website</a></li>
-        <li><a href="">Website</a></li>
-      </ul>
-    </div>
+    <Footer
+      :website="teamData.strWebsite"
+      :facebook="teamData.strFacebook"
+      :twitter="teamData.strTwitter"
+      :youtube="teamData.strYoutube"
+    />
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import Footer from "../components/Footer";
 
 export default {
   name: "LandingPage",
+  components: {
+    Footer,
+  },
+  props: {
+    favTeam: String,
+  },
   data() {
     return {
       teamData: {},
-      favTeam: "philadelphia_eagles",
     };
   },
   created() {
@@ -49,7 +63,7 @@ export default {
     getLandingPageData(favTeamStr) {
       axios
         .get(
-          `https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${favTeamStr}`
+          `https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${this.favTeam}`
         )
         .then((response) => {
           const {
@@ -71,9 +85,12 @@ export default {
 h1 {
   text-align: center;
   img {
-    max-width: 30%;
-    padding: 20px;
+    max-width: 960px;
   }
+}
+
+.hero-image {
+  max-width: 100%;
 }
 
 .landing-page-wrapper {
@@ -85,31 +102,99 @@ h1 {
 }
 
 .bdy-content {
-  padding: 0 40px 20px 40px;
+  padding: 0 10px 20px 10px;
+  text-align: justify;
+
+  @media screen and (min-width: 321px) {
+    padding: 0 40px 20px 40px;
+  }
 }
 
-.footer {
-  background: #000;
-  padding: 10px;
+.team-carousel {
+  position: relative;
+}
 
-  ul {
-    margin: 0px;
-    padding: 0px;
+@media screen and (min-width: 321px) {
+  .row {
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    border-top: 1px solid #000;
+    padding-top: 10px;
+    margin-top: 10px;
   }
 
-  li {
+  .column {
     display: flex;
-    margin-right: 20px;
+    flex-direction: column;
+    flex-basis: 100%;
+    flex: 1;
+  }
+}
 
-    a {
-      color: #fff;
-      text-decoration: none;
+.team-stadium-content {
+  p {
+    text-align: justify;
+    margin: 0;
+  }
 
-      &:hover {
-        text-decoration: underline;
-      }
+  h2 {
+    margin-bottom: 10px;
+    padding: 0;
+  }
+
+  .team-stadium-copy {
+    padding: 0 0 0 20px;
+  }
+
+  .team-logo {
+    max-width: 50%;
+  }
+
+  img {
+    max-width: 100%;
+    margin: 10px 0;
+  }
+
+  .stadium-description {
+    margin-left: 20px;
+
+    @media screen and (max-width: 320px) {
+      margin-left: 0;
     }
+
+    p {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+@media screen and (max-width: 320px) {
+  h1 {
+    text-align: center;
+    img {
+      max-width: 320px;
+    }
+  }
+  .landing-page-wrapper {
+    max-width: 320px;
+  }
+
+  .team-stadium-content {
+    .team-stadium-copy {
+      padding: 0;
+    }
+  }
+}
+
+.team-fan-art {
+  .column {
+    padding: 10px;
+  }
+
+  img {
+    max-width: 100%;
   }
 }
 </style>
